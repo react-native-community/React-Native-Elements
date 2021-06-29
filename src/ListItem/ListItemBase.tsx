@@ -3,15 +3,15 @@ import {
   Platform,
   StyleProp,
   StyleSheet,
-  TouchableHighlight,
-  TouchableHighlightProps,
+  Pressable,
+  PressableProps,
   View,
   ViewStyle,
 } from 'react-native';
 import { PadView } from './components/PadView';
 import { RneFunctionComponent } from '../helpers';
 
-export type ListItemBaseProps = TouchableHighlightProps & {
+export type ListItemBaseProps = PressableProps & {
   containerStyle?: StyleProp<ViewStyle>;
   disabledStyle?: StyleProp<ViewStyle>;
   topDivider?: boolean;
@@ -30,7 +30,7 @@ export const ListItemBase: RneFunctionComponent<ListItemBaseProps> = (
     containerStyle,
     onPress,
     onLongPress,
-    Component = onPress || onLongPress ? TouchableHighlight : View,
+    Component = onPress || onLongPress ? Pressable : View,
     disabled,
     disabledStyle,
     bottomDivider,

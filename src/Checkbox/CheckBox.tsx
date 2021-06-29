@@ -1,21 +1,21 @@
 import React from 'react';
 import {
   StyleSheet,
+  Pressable,
   View,
   Platform,
   TextProps,
   TextStyle,
   ViewStyle,
   StyleProp,
-  TouchableOpacityProps,
-  TouchableOpacity,
+  PressableProps,
 } from 'react-native';
 import TextElement from '../Text';
 import { CheckBoxIcon, CheckBoxIconProps } from './components/CheckBoxIcon';
 import { fonts } from '../config';
 import { RneFunctionComponent } from '../helpers';
 
-export type CheckBoxProps = TouchableOpacityProps &
+export type CheckBoxProps = PressableProps &
   CheckBoxIconProps & {
     Component?: typeof React.Component;
     iconRight?: boolean;
@@ -32,7 +32,7 @@ export type CheckBoxProps = TouchableOpacityProps &
 
 export const CheckBox: RneFunctionComponent<CheckBoxProps> = ({
   checked = false,
-  Component = TouchableOpacity,
+  Component = Pressable,
   iconRight = false,
   title,
   titleProps = {},

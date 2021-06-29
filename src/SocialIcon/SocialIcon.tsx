@@ -3,11 +3,12 @@ import {
   View,
   StyleSheet,
   Platform,
-  TouchableHighlight,
+  Pressable,
   ActivityIndicator,
   ViewStyle,
   StyleProp,
   TextStyle,
+  PressableProps,
 } from 'react-native';
 import Icon from '../Icon';
 import Text from '../Text';
@@ -84,6 +85,7 @@ export type SocialMediaType =
 
 export type SocialIconProps = {
   Component?: typeof React.Component;
+  pressableProps?: PressableProps;
   type?: SocialMediaType;
   button?: boolean;
   onPress?(): void;
@@ -121,19 +123,21 @@ export const SocialIcon: RneFunctionComponent<SocialIconProps> = ({
   loading,
   onLongPress,
   onPress,
-  Component = onPress || onLongPress ? TouchableHighlight : View,
+  Component = onPress || onLongPress ? Pressable : View,
   raised = true,
   small,
   style,
   title,
   type,
   underlayColor,
+  pressableProps,
   ...attributes
 }) => {
   const shouldShowExpandedButton = button && title;
 
   return (
     <Component
+      {...pressableProps}
       {...attributes}
       underlayColor={light ? 'white' : underlayColor || (type && colors[type])}
       onLongPress={disabled ? null : onLongPress}

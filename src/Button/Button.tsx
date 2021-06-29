@@ -1,24 +1,24 @@
-import React, { useCallback, useEffect } from 'react';
+import * as React from 'react';
 import {
   View,
   Text,
-  TouchableNativeFeedback,
-  TouchableOpacity,
   ActivityIndicator,
   Platform,
   StyleSheet,
-  TouchableOpacityProps,
-  TouchableNativeFeedbackProps,
   StyleProp,
   ViewStyle,
   ActivityIndicatorProps,
   TextStyle,
+  PressableProps,
+  Pressable,
+  GestureResponderEvent,
 } from 'react-native';
 import Color from 'color';
-import { renderNode, color, RneFunctionComponent } from '../helpers';
+import { renderNode, color } from '../helpers';
 import Icon, { IconNode } from '../Icon';
 import { Theme } from '../config/theme';
 import { TextProps } from '../Text';
+import { ThemeProps } from '../config';
 
 const defaultLoadingProps = (
   type: 'solid' | 'clear' | 'outline',
@@ -28,194 +28,205 @@ const defaultLoadingProps = (
   size: 'small',
 });
 
-export type ButtonProps = TouchableOpacityProps &
-  TouchableNativeFeedbackProps & {
-    title?: string | React.ReactElement<{}>;
-    titleStyle?: StyleProp<TextStyle>;
-    titleProps?: TextProps;
-    buttonStyle?: StyleProp<ViewStyle>;
-    type?: 'solid' | 'clear' | 'outline';
-    loading?: boolean;
-    loadingStyle?: StyleProp<ViewStyle>;
-    loadingProps?: ActivityIndicatorProps;
-    containerStyle?: StyleProp<ViewStyle>;
-    icon?: IconNode;
-    iconContainerStyle?: StyleProp<ViewStyle>;
-    iconRight?: boolean;
-    linearGradientProps?: object;
-    TouchableComponent?: typeof React.Component;
-    ViewComponent?: typeof React.Component;
-    disabled?: boolean;
-    disabledStyle?: StyleProp<ViewStyle>;
-    disabledTitleStyle?: StyleProp<TextStyle>;
-    raised?: boolean;
-    iconPosition?: 'left' | 'right' | 'top' | 'bottom';
-  };
+const positionStyle = {
+  top: 'column',
+  bottom: 'column-reverse',
+  left: 'row',
+  right: 'row-reverse',
+};
 
-export const Button: RneFunctionComponent<ButtonProps> = ({
-  TouchableComponent,
-  containerStyle,
-  onPress = () => console.log('Please attach a method to this component'),
-  buttonStyle,
-  type = 'solid',
-  loading = false,
-  loadingStyle,
-  loadingProps: passedLoadingProps,
-  title = '',
-  titleProps,
-  titleStyle: passedTitleStyle,
-  icon,
-  iconContainerStyle,
-  iconRight = false,
-  disabled = false,
-  disabledStyle,
-  disabledTitleStyle,
-  raised = false,
-  linearGradientProps,
-  ViewComponent = View,
-  theme,
-  iconPosition = 'left',
-  ...attributes
-}) => {
-  useEffect(() => {
-    if (linearGradientProps && !ViewComponent) {
-      console.error(
-        "You need to pass a ViewComponent to use linearGradientProps !\nExample: ViewComponent={require('react-native-linear-gradient')}"
-      );
-    }
-  });
+export type ButtonProps = PressableProps & {
+  title?: string | React.ReactElement<{}>;
+  titleStyle?: StyleProp<TextStyle>;
+  titleProps?: TextProps;
+  buttonStyle?: StyleProp<ViewStyle>;
+  type?: 'solid' | 'clear' | 'outline';
+  loading?: boolean;
+  loadingStyle?: StyleProp<ViewStyle>;
+  loadingProps?: ActivityIndicatorProps;
+  containerStyle?: StyleProp<ViewStyle>;
+  icon?: IconNode;
+  iconContainerStyle?: StyleProp<ViewStyle>;
+  iconRight?: boolean;
+  linearGradientProps?: object;
+  Component?: typeof React.Component;
+  ViewComponent?: typeof React.Component;
+  disabled?: boolean;
+  disabledStyle?: StyleProp<ViewStyle>;
+  disabledTitleStyle?: StyleProp<TextStyle>;
+  raised?: boolean;
+  iconPosition?: 'left' | 'right' | 'top' | 'bottom';
+};
 
-  const handleOnPress = useCallback(
-    (evt) => {
-      if (!loading) {
-        onPress(evt);
-      }
+export const Button = React.forwardRef<
+  View,
+  ButtonProps & Partial<ThemeProps<ButtonProps>>
+>(
+  (
+    {
+      Component = Pressable,
+      ViewComponent = View,
+      containerStyle,
+      onPress = () => console.log('Please attach a method to this component'),
+      buttonStyle,
+      type = 'solid',
+      loading = false,
+      loadingStyle,
+      loadingProps: passedLoadingProps,
+      title = '',
+      titleProps,
+      titleStyle: passedTitleStyle,
+      icon,
+      iconContainerStyle,
+      iconRight = false,
+      disabled = false,
+      disabledStyle,
+      disabledTitleStyle,
+      raised = false,
+      linearGradientProps,
+      theme,
+      iconPosition = 'left',
+      ...attributes
     },
-    [loading, onPress]
-  );
-
-  // Refactor to Pressable
-  const TouchableComponentInternal =
-    TouchableComponent ||
-    Platform.select({
-      android: linearGradientProps ? TouchableOpacity : TouchableNativeFeedback,
-      default: TouchableOpacity,
+    ref: React.Ref<View>
+  ) => {
+    React.useEffect(() => {
+      if (linearGradientProps && !ViewComponent) {
+        console.error(
+          "You need to pass a ViewComponent to use linearGradientProps !\nExample: ViewComponent={require('react-native-linear-gradient')}"
+        );
+      }
     });
 
-  const titleStyle: StyleProp<TextStyle> = StyleSheet.flatten([
-    {
-      color: type === 'solid' ? 'white' : theme?.colors?.primary,
-    },
-    styles.title,
-    passedTitleStyle,
-    disabled && {
-      color: color(theme?.colors?.disabled).darken(0.3).string(),
-    },
-    disabled && disabledTitleStyle,
-  ]);
+    const handleOnPress = React.useCallback(
+      (event: GestureResponderEvent) => {
+        if (!loading && !disabled) {
+          onPress(event);
+        }
+      },
+      [loading, disabled, onPress]
+    );
 
-  const background =
-    Platform.OS === 'android' && Platform.Version >= 21
-      ? TouchableNativeFeedback.Ripple(
-          Color(titleStyle?.color?.toString()).alpha(0.32).rgb().string(),
-          true
-        )
-      : undefined;
+    const titleStyle: StyleProp<TextStyle> = StyleSheet.flatten([
+      {
+        color: type === 'solid' ? 'white' : theme?.colors?.primary,
+      },
+      styles.title,
+      passedTitleStyle,
+      disabled && {
+        color: color(theme?.colors?.disabled).darken(0.3).string(),
+      },
+      disabled && disabledTitleStyle,
+    ]);
 
-  const loadingProps: ActivityIndicatorProps = {
-    ...defaultLoadingProps(type, theme),
-    ...passedLoadingProps,
-  };
+    const loadingProps: ActivityIndicatorProps = {
+      ...defaultLoadingProps(type, theme),
+      ...passedLoadingProps,
+    };
 
-  const accessibilityState = {
-    disabled: !!disabled,
-    busy: !!loading,
-  };
-  const positionStyle = {
-    top: 'column',
-    bottom: 'column-reverse',
-    left: 'row',
-    right: 'row-reverse',
-  };
+    const accessibilityState = {
+      disabled: !!disabled,
+      busy: !!loading,
+    };
 
-  return (
-    <View
-      style={[
-        styles.container,
-        {
-          borderRadius: 3 || styles.container.borderRadius,
-        },
-        containerStyle,
-        raised && !disabled && type !== 'clear' && styles.raised,
-      ]}
-    >
-      <TouchableComponentInternal
-        onPress={handleOnPress}
-        delayPressIn={0}
-        activeOpacity={0.3}
-        accessibilityRole="button"
-        accessibilityState={accessibilityState}
-        disabled={disabled}
-        background={background}
-        {...attributes}
+    return (
+      <View
+        testID="RNE_BUTTON_WRAPPER"
+        style={[
+          styles.container,
+          {
+            // provide user's radius else 3
+            borderRadius: 3 || styles.container.borderRadius,
+          },
+          containerStyle,
+          raised && !disabled && type !== 'clear' && styles.raised,
+        ]}
       >
-        <ViewComponent
-          {...linearGradientProps}
-          style={StyleSheet.flatten([
-            styles.button,
-            styles.buttonOrientation,
-            {
-              flexDirection:
-                positionStyle[iconRight ? 'right' : iconPosition] || 'row',
-            },
-            {
-              backgroundColor:
-                type === 'solid' ? theme?.colors?.primary : 'transparent',
-              borderColor: theme?.colors?.primary,
-              borderWidth: type === 'outline' ? StyleSheet.hairlineWidth : 0,
-            },
-            buttonStyle,
-            disabled &&
-              type === 'solid' && {
-                backgroundColor: theme?.colors?.disabled,
-              },
-            disabled &&
-              type === 'outline' && {
-                borderColor: color(theme?.colors?.disabled)
-                  .darken(0.3)
-                  .string(),
-              },
-            disabled && disabledStyle,
-          ])}
+        {/* Custom Button Component -> Touchable or Pressable */}
+        <Component
+          ref={ref}
+          onPress={handleOnPress}
+          delayPressIn={0}
+          activeOpacity={0.3}
+          accessibilityRole="button"
+          accessibilityState={accessibilityState}
+          disabled={disabled}
+          // default ripple for pressable
+          android_ripple={{
+            color: Color(titleStyle?.color?.toString())
+              .alpha(0.32)
+              .rgb()
+              .string(),
+            borderless: false,
+            radius: -5,
+          }}
+          {...attributes}
         >
-          {loading && (
-            <ActivityIndicator
-              style={StyleSheet.flatten([styles.loading, loadingStyle])}
-              color={loadingProps.color}
-              size={loadingProps.size}
-              {...loadingProps}
-            />
-          )}
-          {!loading &&
-            icon &&
-            renderNode(Icon, icon, {
-              containerStyle: StyleSheet.flatten([
-                styles.iconContainer,
-                iconContainerStyle,
-              ]),
-            })}
-
-          {!loading &&
-            !!title &&
-            renderNode(Text, title, {
-              style: titleStyle,
-              ...titleProps,
-            })}
-        </ViewComponent>
-      </TouchableComponentInternal>
-    </View>
-  );
-};
+          {/* Custom Provided View Component */}
+          <ViewComponent
+            {...linearGradientProps}
+            style={StyleSheet.flatten([
+              styles.button,
+              styles.buttonOrientation,
+              // flex-direction based on iconPosition
+              {
+                flexDirection: (positionStyle[
+                  iconRight ? 'right' : iconPosition
+                ] || 'row') as ViewStyle['flexDirection'],
+              },
+              {
+                backgroundColor:
+                  type === 'solid' ? theme?.colors?.primary : 'transparent',
+                borderColor: theme?.colors?.primary,
+                borderWidth: type === 'outline' ? StyleSheet.hairlineWidth : 0,
+              },
+              buttonStyle,
+              // Set background color if disabled if solid type
+              disabled &&
+                type === 'solid' && {
+                  backgroundColor: theme?.colors?.disabled,
+                },
+              // Set background color if disabled if outlined type
+              disabled &&
+                type === 'outline' && {
+                  borderColor: color(theme?.colors?.disabled)
+                    .darken(0.3)
+                    .string(),
+                },
+              disabled && disabledStyle,
+            ])}
+          >
+            {/**Show  ActivityIndicator on loading  */}
+            {loading && (
+              <ActivityIndicator
+                style={StyleSheet.flatten([styles.loading, loadingStyle])}
+                color={loadingProps.color}
+                size={loadingProps.size}
+                {...loadingProps}
+              />
+            )}
+            {/**hide icon(iff provided) on loading*/}
+            {!loading &&
+              icon &&
+              renderNode(Icon, icon, {
+                containerStyle: StyleSheet.flatten([
+                  styles.iconContainer,
+                  iconContainerStyle,
+                ]),
+              })}
+            {/**hide title text if provided on loading*/}
+            {!loading &&
+              !!title &&
+              renderNode(Text, title, {
+                style: titleStyle,
+                ...titleProps,
+              })}
+          </ViewComponent>
+        </Component>
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   button: {

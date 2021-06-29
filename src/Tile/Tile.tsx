@@ -3,9 +3,8 @@ import {
   View,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,
-  TouchableOpacityProps,
-  TouchableNativeFeedbackProps,
+  Pressable,
+  PressableProps,
   ViewStyle,
   StyleProp,
   TextStyle,
@@ -18,28 +17,28 @@ import Text from '../Text';
 import Icon, { IconObject, IconProps } from '../Icon';
 import { ThemedFeaturedTile } from './components/FeaturedTile';
 import { RneFunctionComponent } from '../helpers';
+import Color from 'color';
 
-export type TileProps = TouchableOpacityProps &
-  TouchableNativeFeedbackProps & {
-    title?: string;
-    icon?: IconObject & IconProps;
-    caption?: React.ReactNode;
-    imageSrc?: ImageSourcePropType | string | number;
-    activeOpacity?: number;
-    containerStyle?: StyleProp<ViewStyle>;
-    imageContainerStyle?: StyleProp<ViewStyle>;
-    iconContainerStyle?: StyleProp<ViewStyle>;
-    overlayContainerStyle?: StyleProp<ViewStyle>;
-    titleStyle?: StyleProp<TextStyle>;
-    captionStyle?: StyleProp<TextStyle>;
-    width?: number;
-    height?: number;
-    featured?: boolean;
-    contentContainerStyle?: StyleProp<ViewStyle>;
-    titleNumberOfLines?: number;
-    imageProps?: Partial<ImageProps>;
-    ImageComponent?: typeof React.Component;
-  };
+export type TileProps = PressableProps & {
+  title?: string;
+  icon?: IconObject & IconProps;
+  caption?: React.ReactNode;
+  imageSrc?: ImageSourcePropType | string | number;
+  activeOpacity?: number;
+  containerStyle?: StyleProp<ViewStyle>;
+  imageContainerStyle?: StyleProp<ViewStyle>;
+  iconContainerStyle?: StyleProp<ViewStyle>;
+  overlayContainerStyle?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
+  captionStyle?: StyleProp<TextStyle>;
+  width?: number;
+  height?: number;
+  featured?: boolean;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+  titleNumberOfLines?: number;
+  imageProps?: Partial<ImageProps>;
+  ImageComponent?: typeof React.Component;
+};
 
 export const Tile: RneFunctionComponent<TileProps> = ({
   featured,
@@ -62,6 +61,7 @@ export const Tile: RneFunctionComponent<TileProps> = ({
   imageProps = {},
   width = Dimensions.get('window').width,
   height = width * 0.8,
+  theme,
   ...attributes
 }) => {
   if (featured) {
@@ -86,10 +86,17 @@ export const Tile: RneFunctionComponent<TileProps> = ({
   }
 
   return (
-    <TouchableOpacity
+    <Pressable
       {...attributes}
       onPress={onPress}
-      activeOpacity={activeOpacity}
+      android_ripple={{
+        color: Color(theme?.colors?.primary)
+          .alpha(activeOpacity)
+          .rgb()
+          .toString(),
+        borderless: false,
+        radius: -5,
+      }}
       style={StyleSheet.flatten([
         {
           width,
@@ -138,7 +145,7 @@ export const Tile: RneFunctionComponent<TileProps> = ({
         </Text>
         {children}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

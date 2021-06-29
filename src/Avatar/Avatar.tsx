@@ -4,13 +4,14 @@ import {
   Text,
   Image as RNImage,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   StyleProp,
   ViewStyle,
   TextStyle,
   ImageSourcePropType,
   ImageURISource,
   ImageStyle,
+  PressableProps,
 } from 'react-native';
 import { renderNode, RneFunctionComponent } from '../helpers';
 import Icon, { IconObject } from '../Icon';
@@ -46,12 +47,13 @@ export type AvatarBaseProps = {
   renderPlaceholderContent?: React.ReactElement<{}>;
   imageProps?: Partial<ImageProps>;
   ImageComponent?: React.ComponentClass;
+  pressableProps?: PressableProps;
 };
 
 export const AvatarBase: RneFunctionComponent<AvatarBaseProps> = ({
   onPress,
   onLongPress,
-  Component = onPress || onLongPress ? TouchableOpacity : View,
+  Component = onPress || onLongPress ? Pressable : View,
   containerStyle,
   icon,
   iconStyle,
@@ -67,6 +69,7 @@ export const AvatarBase: RneFunctionComponent<AvatarBaseProps> = ({
   renderPlaceholderContent,
   ImageComponent = RNImage,
   children,
+  pressableProps,
   ...attributes
 }) => {
   let width = avatarSizes.small;
@@ -123,6 +126,7 @@ export const AvatarBase: RneFunctionComponent<AvatarBaseProps> = ({
         containerStyle,
       ])}
       {...attributes}
+      {...pressableProps}
     >
       <Image
         placeholderStyle={StyleSheet.flatten([
